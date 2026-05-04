@@ -152,94 +152,28 @@ body{font-family:'DM Sans',sans-serif;background:#f0ede6;color:#1c1c1a;min-heigh
   </div>
 </main>
 <footer class="site-footer"><strong>ICOF CSU Eastern Campus</strong> &nbsp;&mdash;&nbsp; Student Results Portal &nbsp;&mdash;&nbsp; For official academic use only &nbsp;&mdash;&nbsp; &copy; <span id="yr"></span> Examinations Office</footer><script>document.getElementById("yr").textContent=new Date().getFullYear()</script>
-<script>
-const SK='icof_csu_db',PK='icof_csu_pin',SSK='icof_csu_sess';
-function loadDB(){try{return JSON.parse(localStorage.getItem(SK)||'{}')}catch(e){return {}}}
-let db=loadDB(),pendingSN=null;
-function gradeClass(g){return 'g-'+(g||'F').toUpperCase()[0]}
-function calcStatus(s){if(!s||!s.length)return{avg:'—',passed:false};const a=s.reduce((t,x)=>t+(parseFloat(x.score)||0),0)/s.length;return{avg:a.toFixed(1),passed:a>=50}}
-function updateStats(){
-  const k=Object.keys(db);let p=0,f=0;
-  k.forEach(x=>{const s=calcStatus(db[x].subjects);s.passed?p++:f++});
-  document.getElementById('st').textContent=k.length||'—';
-  document.getElementById('sp').textContent=k.length?p:'—';
-  document.getElementById('sf').textContent=k.length?f:'—';
-  document.getElementById('ss').textContent=localStorage.getItem(SSK)||'—';
-}
-function lookupStudent(){
-  const v=document.getElementById('li').value.trim();
-  document.getElementById('rw').classList.remove('show');document.getElementById('nf').classList.remove('show');
-  document.getElementById('pr').classList.remove('show');document.getElementById('ph').style.display='none';
-  if(!v)return;db=loadDB();
-  if(db[v]){pendingSN=v;const pin=localStorage.getItem(PK)||'';
-    if(!pin||pin==='0000'){showResult(v)}
-    else{document.getElementById('pr').classList.add('show');document.getElementById('ph').style.display='block';document.getElementById('pi').value='';document.getElementById('pi').focus()}}
-  else{document.getElementById('nf').classList.add('show')}
-}
-function verifyPin(){
-  const e=document.getElementById('pi').value.trim(),c=localStorage.getItem(PK)||'0000';
-  if(e===c){showResult(pendingSN);document.getElementById('pr').classList.remove('show');document.getElementById('ph').style.display='none'}
-  else{document.getElementById('pi').style.outline='2px solid #ef4444';document.getElementById('pi').value='';setTimeout(()=>document.getElementById('pi').style.outline='',1200)}
-}
-function showResult(sn){
-  const rec=db[sn];if(!rec)return;
-  document.getElementById('rn').textContent=rec.name||sn;
-  document.getElementById('rm').textContent=[sn,'ICOF CSU Eastern Campus',localStorage.getItem(SSK)||''].filter(Boolean).join(' | ');
-  let info='';
-  [['Student No.',sn],['Full Name',rec.name||'—'],['Gender',rec.gender||'—'],['Programme',rec.programme||'—']].forEach(([l,v])=>info+=`<div class="rc-info-item"><div class="ri-l">${l}</div><div class="ri-v">${v}</div></div>`);
-  document.getElementById('ri').innerHTML=info;
-  const tb=document.getElementById('rtb');tb.innerHTML='';
-  (rec.subjects||[]).forEach(s=>tb.innerHTML+=`<tr><td style="font-weight:500">${s.subject}</td><td>${s.score}%</td><td><span class="grade-circle ${gradeClass(s.grade)}">${s.grade||'—'}</span></td><td style="color:var(--muted)">${s.remarks||'—'}</td></tr>`);
-  const{avg,passed}=calcStatus(rec.subjects);
-  const b=document.getElementById('rb');b.textContent=passed?'PASSED':'FAILED';b.className='rc-badge '+(passed?'badge-pass':'badge-fail');
-  document.getElementById('rs').innerHTML=`<div><div class="rs-l">Subjects Sat</div><div class="rs-v">${(rec.subjects||[]).length}</div></div><div><div class="rs-l">Average Score</div><div class="rs-v">${avg}%</div></div><div><div class="rs-l">Overall Result</div><div class="rs-v" style="color:${passed?'var(--green)':'var(--red)'}">${passed?'PASSED':'FAILED'}</div></div><button class="print-btn" onclick="window.print()">🖨 Print Result Slip</button>`;
-  document.getElementById('rw').classList.add('show');document.getElementById('rw').scrollIntoView({behavior:'smooth',block:'start'});
-}
-document.getElementById('li').addEventListener('keydown',e=>{if(e.key==='Enter')lookupStudent()});
-document.getElementById('pi').addEventListener('keydown',e=>{if(e.key==='Enter')verifyPin()});
-if(!Object.keys(db).length){const demo={'2024/EC001':{name:'Mwale John Banda',gender:'Male',programme:'Business Studies',subjects:[{subject:'Business Mathematics',score:87,grade:'A',remarks:'Excellent'},{subject:'English Communication',score:74,grade:'B',remarks:'Good'},{subject:'Accounting Principles',score:91,grade:'A',remarks:'Outstanding'},{subject:'Economics',score:63,grade:'C',remarks:'Average'},{subject:'Computer Applications',score:79,grade:'B',remarks:'Good'}]},'2024/EC002':{name:'Tembo Grace Chanda',gender:'Female',programme:'Information Technology',subjects:[{subject:'Programming Fundamentals',score:55,grade:'C',remarks:'Satisfactory'},{subject:'English Communication',score:82,grade:'A',remarks:'Excellent'},{subject:'Database Management',score:61,grade:'C',remarks:'Average'},{subject:'Computer Networks',score:77,grade:'B',remarks:'Good'},{subject:'Systems Analysis',score:48,grade:'D',remarks:'Needs improvement'}]}};localStorage.setItem(SK,JSON.stringify(demo));db=demo;}
-updateStats();
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-analytics.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
 
-const firebaseConfig = {
-  apiKey: "YOUR_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-};
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyBKUywHtCihyB6QE6Dv1izfkKSIKOOHBOk",
+    authDomain: "icof-results.firebaseapp.com",
+    projectId: "icof-results",
+    storageBucket: "icof-results.firebasestorage.app",
+    messagingSenderId: "1008201893345",
+    appId: "1:1008201893345:web:d10c8943d6c6b8c1c1bea0",
+    measurementId: "G-GG9G28E81Q"
+  };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-// SEARCH FUNCTION
-async function searchResult() {
-  const input = document.querySelector(".search-grp input").value.trim();
-
-  const resultWrap = document.querySelector(".result-wrap");
-  const notFound = document.querySelector(".not-found-wrap");
-
-  resultWrap.classList.remove("show");
-  notFound.classList.remove("show");
-
-  const q = query(collection(db, "students"), where("examNumber", "==", input));
-  const snapshot = await getDocs(q);
-
-  if (!snapshot.empty) {
-    const student = snapshot.docs[0].data();
-    displayResult(student);
-    resultWrap.classList.add("show");
-  } else {
-    notFound.classList.add("show");
-  }
-}
-
-// BUTTON + ENTER
-document.querySelector(".search-grp button").onclick = searchResult;
-
-document.querySelector(".search-grp input").addEventListener("keypress", (e) => {
-  if (e.key === "Enter") searchResult();
-});
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
 </script>
 </script>
 </body></html>
