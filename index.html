@@ -199,33 +199,34 @@ document.getElementById('li').addEventListener('keydown',e=>{if(e.key==='Enter')
 document.getElementById('pi').addEventListener('keydown',e=>{if(e.key==='Enter')verifyPin()});
 if(!Object.keys(db).length){const demo={'2024/EC001':{name:'Mwale John Banda',gender:'Male',programme:'Business Studies',subjects:[{subject:'Business Mathematics',score:87,grade:'A',remarks:'Excellent'},{subject:'English Communication',score:74,grade:'B',remarks:'Good'},{subject:'Accounting Principles',score:91,grade:'A',remarks:'Outstanding'},{subject:'Economics',score:63,grade:'C',remarks:'Average'},{subject:'Computer Applications',score:79,grade:'B',remarks:'Good'}]},'2024/EC002':{name:'Tembo Grace Chanda',gender:'Female',programme:'Information Technology',subjects:[{subject:'Programming Fundamentals',score:55,grade:'C',remarks:'Satisfactory'},{subject:'English Communication',score:82,grade:'A',remarks:'Excellent'},{subject:'Database Management',score:61,grade:'C',remarks:'Average'},{subject:'Computer Networks',score:77,grade:'B',remarks:'Good'},{subject:'Systems Analysis',score:48,grade:'D',remarks:'Needs improvement'}]}};localStorage.setItem(SK,JSON.stringify(demo));db=demo;}
 updateStats();
-</script><script>
-// Sample student results (you can expand this)
-const students = [
-  {
-    examNumber: "12345",
-    name: "John Banda",
-    program: "ICT",
-    results: [
-      { subject: "Math", grade: "A" },
-      { subject: "English", grade: "B" }
-    ],
-    status: "PASS"
-  }
-];
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-// Search function
-function searchResult() {
+const firebaseConfig = {
+  apiKey: "YOUR_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// SEARCH FUNCTION
+async function searchResult() {
   const input = document.querySelector(".search-grp input").value.trim();
+
   const resultWrap = document.querySelector(".result-wrap");
   const notFound = document.querySelector(".not-found-wrap");
 
   resultWrap.classList.remove("show");
   notFound.classList.remove("show");
 
-  const student = students.find(s => s.examNumber === input);
+  const q = query(collection(db, "students"), where("examNumber", "==", input));
+  const snapshot = await getDocs(q);
 
-  if (student) {
+  if (!snapshot.empty) {
+    const student = snapshot.docs[0].data();
     displayResult(student);
     resultWrap.classList.add("show");
   } else {
@@ -233,29 +234,12 @@ function searchResult() {
   }
 }
 
-// Display result
-function displayResult(student) {
-  const table = document.querySelector(".results-tbl tbody");
-  table.innerHTML = "";
+// BUTTON + ENTER
+document.querySelector(".search-grp button").onclick = searchResult;
 
-  student.results.forEach(r => {
-    table.innerHTML += `
-      <tr>
-        <td>${r.subject}</td>
-        <td>${r.grade}</td>
-      </tr>
-    `;
-  });
-
-  document.querySelector(".rc-name").textContent = student.name;
-}
-
-// Button click
-document.querySelector(".search-grp button").addEventListener("click", searchResult);
-
-// Enter key support
-document.querySelector(".search-grp input").addEventListener("keypress", function(e) {
+document.querySelector(".search-grp input").addEventListener("keypress", (e) => {
   if (e.key === "Enter") searchResult();
 });
+</script>
 </script>
 </body></html>
